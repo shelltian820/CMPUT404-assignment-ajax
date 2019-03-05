@@ -35,11 +35,14 @@ var H = canvas.height = window.innerHeight-50;
 function sendJSONXMLHTTPRequest(url, objects, callback) {
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
-        if (xhr.readyState==4) {
+        if (xhr.readyState==4) { //4=DONE
             try {
                 if (xhr.status==200) {
+                    console.log("xhr.responseText = "+xhr.responseText);
                     //XXX: parse some JSON from the request!
+                    var response = JSON.parse(xhr.responseText);
                     //XXX: Pass the data to the callback!
+                    callback(response);
                 }
             } 
             catch(e) {
@@ -48,8 +51,12 @@ function sendJSONXMLHTTPRequest(url, objects, callback) {
         }
     };
     //XXX: POST to a URL
+    xhr.open("POST", url, true);
     //XXX: set the mimetype and the accept headers!
     // Remember to use application/json !
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.setRequestHeader("Accept", "application/json");
+    xhr.send(JSON.stringify(objects));
 }
 
 
@@ -59,13 +66,13 @@ world = {};
 function drawCircle(context,entity) {
     with(context) {
         beginPath();              
-        lineWidth = 3;
+        lineWidth = 8;
         var x = entity["x"];
         var y = entity["y"];
         //moveTo(x,y);
         fillStyle = entity["colour"];
         strokeStyle = fillStyle;
-        arc(x, y, (entity["radius"])?entity["radius"]:50, 0, 2.0 * Math.PI, false);  
+        arc(x, y, (entity["radius"])?entity["radius"]:10, 0, 2.0 * Math.PI, false);  
         stroke();                                
     }
 }
@@ -75,7 +82,7 @@ function prepEntity(entity) {
         entity["colour"] = "#FF0000";
     }
     if (!entity["radius"]) {
-        entity["radius"] = 50;
+        entity["radius"] = 10;
     }
     return entity;
 }
@@ -136,8 +143,10 @@ function getPosition(e) {
 
 function addEntity(entity, data) {
     world[entity] = data;
-    drawNextFrame(); // (but should we?)
+    drawNextFrame(); // (but should we?) 
     //XXX: Send a XHTML Request that updates the entity you just  modified!
+    //use xhtmlrequest.open() to initialize request?
+    //xhtmlrequest.send()
 
 }
 
@@ -262,6 +271,7 @@ mouse.mousedraggers.push(function(x,y,clicked,e) {
 
 function update() {
     //XXX: TODO Get the world from the webservice using a XMLHTTPRequest
+    
     drawFrame();
 }
 
